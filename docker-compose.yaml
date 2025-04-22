@@ -1,5 +1,5 @@
 services:
-  posgres:
+  postgres:
     image: postgres
     environment:
       POSTGRES_PASSWORD: postgrespw
@@ -24,4 +24,4 @@ services:
 volumes:
   pgdata:
   mongodata:
-    
+  
