@@ -15,7 +15,10 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog((ctx, lc) => lc
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}", formatProvider: CultureInfo.InvariantCulture)
+        .WriteTo.Console(
+            outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
+            formatProvider: CultureInfo.InvariantCulture)
         .Enrich.FromLogContext()
         .ReadFrom.Configuration(ctx.Configuration));
 
@@ -24,24 +27,16 @@ try
         .ConfigurePipeline();
 
     // this seeding is only for the template to bootstrap the DB and users.
-    // in production you will likely want a different approach.
-    if (args.Contains("/seed"))
-    {
-        Log.Information("Seeding database...");
-        SeedData.EnsureSeedData(app);
-        Log.Information("Done seeding database. Exiting.");
-        return;
-    }
+    // in production, you will likely want a different approach.
+    SeedData.EnsureSeedData(app);
 
     if (app.Environment.IsDevelopment())
-    {
         app.Lifetime.ApplicationStopping.Register(() =>
         {
             var usage = app.Services.GetRequiredService<LicenseUsageSummary>();
             Console.Write(Summary(usage));
             Console.ReadKey();
         });
-    }
 
     app.Run();
 }
