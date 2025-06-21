@@ -6,22 +6,22 @@ import Heading from "./Heading";
 import { Button } from "flowbite-react";
 import { signIn } from "next-auth/react";
 
-type Props = {
-    title?: string
-    subtitle?: string
-    showReset?: boolean
-    showLogin?: boolean
-    callbackUrl?: string
+interface IEmptyFilter {
+    title?: string;
+    subtitle?: string;
+    showReset?: boolean;
+    showLogin?: boolean;
+    callbackUrl?: string;
 }
 
-export const EmptyFilter = (
+const EmptyFilter: React.FC<IEmptyFilter> = (
     {
         title = "No matches for this filter",
         subtitle = "Try changing or resetting the filter",
         showReset,
         showLogin,
         callbackUrl
-    }: Props) => {
+    }) => {
     const reset = useParamsStore(state => state.reset);
 
     return (

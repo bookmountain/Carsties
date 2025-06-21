@@ -12,7 +12,7 @@ import EmptyFilter from "../components/EmptyFilter";
 import { useAuctionStore } from "@/hooks/useAuctionStore";
 import { Spinner } from "flowbite-react";
 
-export const Listings = () => {
+const Listings = () => {
     const [loading, setLoading] = useState(true);
     const params = useParamsStore(
         (state) => ({
