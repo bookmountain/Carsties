@@ -1,7 +1,7 @@
 "use client";
 
 import { useParamsStore } from "@/hooks/useParamsStore";
-import { Button, Dropdown } from "flowbite-react";
+import { Dropdown } from "flowbite-react";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -31,10 +31,7 @@ const UserBehaviors: React.FC<IUserBehaviors> = ({ user }) => {
 
 
     return (
-        <Dropdown
-            inline
-            label={`Welcome ${user.name}`}
-        >
+        <Dropdown inline label={`Welcome ${user.name}`}>
             <Dropdown.Item icon={HiUser} onClick={setSeller}>
                 My Auctions
             </Dropdown.Item>
