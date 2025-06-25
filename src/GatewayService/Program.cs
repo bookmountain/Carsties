@@ -11,11 +11,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.TokenValidationParameters.ValidateAudience = false;
     options.TokenValidationParameters.NameClaimType = "name";
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("customPolicy", b =>
+    {
+        b.AllowAnyHeader()
+            .AllowAnyMethod().AllowCredentials().WithOrigins(builder.Configuration["ClientApp"] ?? string.Empty);
+    });
+});
 
 var app = builder.Build();
 
+app.UseCors();
 app.MapReverseProxy();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
