@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import {Auction} from "@/types";
-import {Table} from "flowbite-react";
+import { Auction } from "@/types";
+import { Table } from "flowbite-react";
+import React from "react";
 
-type Props = {
-    auction: Auction
+interface IDetailedSpecs {
+    auction: Auction;
 }
-export default function DetailedSpecs({auction}: Props) {
+
+const DetailedSpecs: React.FC<IDetailedSpecs> = ({ auction }) => {
+    console.log(auction);
     return (
         <Table striped={true}>
             <Table.Body className="divide-y">
@@ -55,10 +58,12 @@ export default function DetailedSpecs({auction}: Props) {
                         Has reserve price?
                     </Table.Cell>
                     <Table.Cell>
-                        {auction.reservePrice > 0 ? 'Yes' : 'No'}
+                        {auction.reservePrice > 0 ? "Yes" : "No"}
                     </Table.Cell>
                 </Table.Row>
             </Table.Body>
         </Table>
     );
-}
+};
+
+export default DetailedSpecs;

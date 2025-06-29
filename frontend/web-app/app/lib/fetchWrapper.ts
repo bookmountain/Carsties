@@ -3,17 +3,19 @@ import { getTokenWorkaround } from "@/app/actions/authActions";
 // const baseUrl = process.env.API_URL;
 const baseUrl = "http://localhost:6001/";
 
-async function get(url: string) {
+export type ApiError = { error: { status: number; message: string } };
+
+async function get<T>(url: string): Promise<T | ApiError> {
     const requestOptions = {
         method: "GET",
-        header: await getHeaders()
+        headers: await getHeaders()  // typo fixed: `header` → `headers`
     };
 
     const response = await fetch(baseUrl + url, requestOptions);
-    return await handleResponse(response);
+    return await handleResponse<T>(response);
 }
 
-async function post(url: string, body: {}) {
+async function post<T>(url: string, body: {}): Promise<T | ApiError> {
     const requestOptions = {
         method: "POST",
         headers: await getHeaders(),
@@ -51,9 +53,11 @@ async function getHeaders() {
     return headers;
 }
 
-async function handleResponse(response: Response) {
+
+async function handleResponse<T>(response: Response): Promise<T | ApiError> {
     const text = await response.text();
-    let data;
+    let data: unknown;
+
     try {
         data = JSON.parse(text);
     } catch (error) {
@@ -61,13 +65,14 @@ async function handleResponse(response: Response) {
     }
 
     if (response.ok) {
-        return data || response.statusText;
+        return (data as T) ?? (response.statusText as unknown as T);
     } else {
-        const error = {
-            status: response.status,
-            message: typeof data === "string" && data.length > 0 ? data : response.statusText
+        return {
+            error: {
+                status: response.status,
+                message: typeof data === "string" && data.length > 0 ? data : response.statusText
+            }
         };
-        return { error };
     }
 }
 

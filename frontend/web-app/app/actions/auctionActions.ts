@@ -1,11 +1,11 @@
 "use server";
 
 import { Auction, Bid, PagedResult } from "@/types";
-import { fetchWrapper } from "@/app/lib/fetchWrapper";
+import { ApiError, fetchWrapper } from "@/app/lib/fetchWrapper";
 import { FieldValues } from "react-hook-form";
 import { revalidatePath } from "next/cache";
 
-export async function getData(query: string): Promise<PagedResult<Auction>> {
+export async function getData(query: string): Promise<PagedResult<Auction> | ApiError> {
     return await fetchWrapper.get(`search/${query}`);
 }
 
@@ -21,7 +21,7 @@ export async function createAuction(data: FieldValues) {
     return await fetchWrapper.post("auctions", data);
 }
 
-export async function getDetailedViewData(id: string): Promise<Auction> {
+export async function getDetailedViewData(id: string): Promise<Auction | ApiError> {
     return await fetchWrapper.get(`auctions/${id}`);
 }
 
@@ -35,10 +35,10 @@ export async function deleteAuction(id: string) {
     return await fetchWrapper.del(`auctions/${id}`);
 }
 
-export async function getBidsForAuction(id: string): Promise<Bid[]> {
+export async function getBidsForAuction(id: string): Promise<Bid[] | ApiError> {
     return await fetchWrapper.get(`bids/${id}`);
 }
 
-export async function placeBidForAuction(auctionId: string, amount: number) {
+export async function placeBidForAuction(auctionId: string, amount: number): Promise<Bid | ApiError> {
     return await fetchWrapper.post(`bids?auctionId=${auctionId}&amount=${amount}`, {});
 }

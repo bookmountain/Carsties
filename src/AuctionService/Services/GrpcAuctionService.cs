@@ -26,7 +26,7 @@ public class GrpcAuctionService : GrpcAuction.GrpcAuctionBase
             {
                 AuctionEnd = auction.AuctionEnd.ToString(),
                 Id = auction.Id.ToString(),
-                ReservePrice = auction.ReservedPrice,
+                ReservePrice = auction.ReservePrice,
                 Seller = auction.Seller
             }
         };

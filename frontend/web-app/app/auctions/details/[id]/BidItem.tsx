@@ -3,14 +3,15 @@ import { Bid } from "@/types";
 import { format } from "date-fns";
 import React from "react";
 
-type Props = {
-    bid: Bid
+interface IBidItemProps {
+    bid: Bid;
 }
 
-export default function BidItem({ bid }: Props) {
-    function getBidInfo() {
+const BidItem: React.FC<IBidItemProps> = ({ bid }) => {
+    const getBidInfo = () => {
         let bgColor = "";
         let text = "";
+        console.log(bid);
         switch (bid.bidStatus) {
             case "Accepted":
                 bgColor = "bg-green-200";
@@ -30,7 +31,7 @@ export default function BidItem({ bid }: Props) {
                 break;
         }
         return { bgColor, text };
-    }
+    };
 
     return (
         <div className={`
@@ -52,4 +53,6 @@ export default function BidItem({ bid }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export default BidItem;

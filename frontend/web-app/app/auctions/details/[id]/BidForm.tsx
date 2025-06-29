@@ -1,6 +1,6 @@
 "use client";
 
-type Props = {
+interface IBidFormProps {
     auctionId: string;
     highBid: number;
 }
@@ -12,7 +12,8 @@ import React from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
-export default function BidForm({ auctionId, highBid }: Props) {
+
+const BidForm: React.FC<IBidFormProps> = ({ auctionId, highBid }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
     const addBid = useBidStore(state => state.addBid);
 
@@ -23,7 +24,7 @@ export default function BidForm({ auctionId, highBid }: Props) {
         }
 
         placeBidForAuction(auctionId, +data.amount).then(bid => {
-            if (bid.error) throw bid.error;
+            if ("error" in bid) throw bid.error;
             addBid(bid);
             reset();
         }).catch(err => toast.error(err.message));
@@ -39,4 +40,6 @@ export default function BidForm({ auctionId, highBid }: Props) {
             />
         </form>
     );
-}
+};
+
+export default BidForm;

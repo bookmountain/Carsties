@@ -12,12 +12,12 @@ import { numberWithCommas } from "@/app/lib/numberWithCommas";
 import EmptyFilter from "@/app/components/EmptyFilter";
 import BidForm from "./BidForm";
 
-type Props = {
-    user: User | null
-    auction: Auction
+interface IBidListProps {
+    user: User | null;
+    auction: Auction;
 }
 
-export default function BidList({ user, auction }: Props) {
+const BidList: React.FC<IBidListProps> = ({ user, auction }) => {
     const [loading, setLoading] = useState(true);
     const bids = useBidStore(state => state.bids);
     const setBids = useBidStore(state => state.setBids);
@@ -33,14 +33,17 @@ export default function BidList({ user, auction }: Props) {
 
     useEffect(() => {
         getBidsForAuction(auction.id)
-            .then((res: any) => {
-                if (res.error) {
-                    throw res.error;
+            .then((res) => {
+                if ("error" in res) {
+                    throw new Error(res.error.message);
                 }
-                setBids(res as Bid[]);
-            }).catch(err => {
-            toast.error(err.message);
-        }).finally(() => setLoading(false));
+
+                setBids(res);
+            })
+            .catch((err) => {
+                toast.error(err.message);
+            })
+            .finally(() => setLoading(false));
     }, [auction.id, setLoading, setBids]);
 
     useEffect(() => {
@@ -89,4 +92,6 @@ export default function BidList({ user, auction }: Props) {
             </div>
         </div>
     );
-}
+};
+
+export default BidList;

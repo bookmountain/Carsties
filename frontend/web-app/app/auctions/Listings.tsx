@@ -11,6 +11,7 @@ import qs from "query-string";
 import EmptyFilter from "../components/EmptyFilter";
 import { useAuctionStore } from "@/hooks/useAuctionStore";
 import { Spinner } from "flowbite-react";
+import { toast } from "react-hot-toast";
 
 const Listings = () => {
     const [loading, setLoading] = useState(true);
@@ -43,10 +44,17 @@ const Listings = () => {
     };
 
     useEffect(() => {
-        getData(url).then((data) => {
-            setData(data);
-            setLoading(false);
-        });
+        getData(url)
+            .then((res) => {
+                if ("error" in res) {
+                    throw new Error(res.error.message);
+                }
+                setData(res);
+            })
+            .catch((err) => {
+                toast.error(err.message);
+            })
+            .finally(() => setLoading(false));
     }, [url]);
 
     if (loading) return <div className="flex justify-center"><Spinner /></div>;
