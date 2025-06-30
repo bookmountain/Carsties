@@ -1,11 +1,18 @@
 import { getTokenWorkaround } from "@/app/actions/authActions";
 
-// const baseUrl = process.env.API_URL;
-const baseUrl = "http://localhost:6001/";
+const baseUrl = process.env.API_URL;
 
-export type ApiError = { error: { status: number; message: string } };
+export class ApiError extends Error {
+    status: number;
 
-async function get<T>(url: string): Promise<T | ApiError> {
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+    }
+}
+
+async function get<T>(url: string): Promise<T> {
     const requestOptions = {
         method: "GET",
         headers: await getHeaders()  // typo fixed: `header` → `headers`
@@ -15,7 +22,7 @@ async function get<T>(url: string): Promise<T | ApiError> {
     return await handleResponse<T>(response);
 }
 
-async function post<T>(url: string, body: {}): Promise<T | ApiError> {
+async function post<T>(url: string, body: {}): Promise<T> {
     const requestOptions = {
         method: "POST",
         headers: await getHeaders(),
@@ -35,7 +42,7 @@ async function put(url: string, body: {}) {
     return await handleResponse(response);
 }
 
-async function del(url: string) {
+async function del<T>(url: string): Promise<T> {
     const requestOptions = {
         method: "DELETE",
         headers: await getHeaders()
@@ -54,25 +61,24 @@ async function getHeaders() {
 }
 
 
-async function handleResponse<T>(response: Response): Promise<T | ApiError> {
+async function handleResponse<T>(response: Response): Promise<T> {
     const text = await response.text();
     let data: unknown;
 
     try {
         data = JSON.parse(text);
-    } catch (error) {
+    } catch {
         data = text;
     }
 
     if (response.ok) {
-        return (data as T) ?? (response.statusText as unknown as T);
+        return data as T;
     } else {
-        return {
-            error: {
-                status: response.status,
-                message: typeof data === "string" && data.length > 0 ? data : response.statusText
-            }
-        };
+        const message = typeof data === "string" && data.length > 0
+            ? data
+            : (data as any)?.message || response.statusText;
+
+        throw new ApiError(message, response.status);
     }
 }
 

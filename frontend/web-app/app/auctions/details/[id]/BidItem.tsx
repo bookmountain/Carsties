@@ -11,7 +11,6 @@ const BidItem: React.FC<IBidItemProps> = ({ bid }) => {
     const getBidInfo = () => {
         let bgColor = "";
         let text = "";
-        console.log(bid);
         switch (bid.bidStatus) {
             case "Accepted":
                 bgColor = "bg-green-200";

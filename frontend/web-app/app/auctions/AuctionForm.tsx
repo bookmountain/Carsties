@@ -9,6 +9,7 @@ import { createAuction, updateAuction } from "../actions/auctionActions";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Auction } from "@/types";
+import { ApiError } from "@/app/lib/fetchWrapper";
 
 interface IAuctionForm {
     auction?: Auction;
@@ -35,7 +36,7 @@ const AuctionForm: React.FC<IAuctionForm> = ({ auction }) => {
     async function onSubmit(data: FieldValues) {
         try {
             let id = "";
-            let res;
+            let res: any;
             if (pathname === "/auctions/create") {
                 res = await createAuction(data);
                 id = res.id;
@@ -45,7 +46,7 @@ const AuctionForm: React.FC<IAuctionForm> = ({ auction }) => {
                     id = auction.id;
                 }
             }
-            if (res.error) {
+            if ("error" in res) {
                 throw res.error;
             }
             router.push(`/auctions/details/${id}`);

@@ -46,9 +46,6 @@ const Listings = () => {
     useEffect(() => {
         getData(url)
             .then((res) => {
-                if ("error" in res) {
-                    throw new Error(res.error.message);
-                }
                 setData(res);
             })
             .catch((err) => {

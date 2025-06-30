@@ -9,7 +9,6 @@ interface IDetailedSpecs {
 }
 
 const DetailedSpecs: React.FC<IDetailedSpecs> = ({ auction }) => {
-    console.log(auction);
     return (
         <Table striped={true}>
             <Table.Body className="divide-y">

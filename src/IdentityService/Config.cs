@@ -15,34 +15,37 @@ public static class Config
         new("auctionApp", "Auction app full access")
     ];
 
-    public static IEnumerable<Client> Clients =>
-    [
-        new()
-        {
-            ClientId = "postman",
-            ClientName = "Postman Client",
-            AllowedScopes =
+    public static IEnumerable<Client> Clients(IConfiguration config)
+    {
+        return
+        [
+            new()
             {
-                "auctionApp",
-                "openid",
-                "profile"
+                ClientId = "postman",
+                ClientName = "Postman Client",
+                AllowedScopes =
+                {
+                    "auctionApp",
+                    "openid",
+                    "profile"
+                },
+                RedirectUris = { "https://localhost:5001/signin-oidc" },
+                ClientSecrets = [new Secret("NotASecret".Sha256())],
+                AllowedGrantTypes = { GrantType.ResourceOwnerPassword }
             },
-            RedirectUris = { "https://localhost:5001/signin-oidc" },
-            ClientSecrets = [new Secret("NotASecret".Sha256())],
-            AllowedGrantTypes = { GrantType.ResourceOwnerPassword }
-        },
-        new()
-        {
-            ClientId = "nextApp",
-            ClientName = "nextApp",
-            ClientSecrets = { new Secret("secret".Sha256()) },
-            AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-            RequirePkce = false,
-            RedirectUris = { "http://localhost:3000/api/auth/callback/id-server" },
-            AllowOfflineAccess = true,
-            AllowedScopes = { "openid", "profile", "auctionApp" },
-            AccessTokenLifetime = 3600 * 24 * 30,
-            AlwaysIncludeUserClaimsInIdToken = true
-        }
-    ];
+            new()
+            {
+                ClientId = "nextApp",
+                ClientName = "nextApp",
+                ClientSecrets = { new Secret("secret".Sha256()) },
+                AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+                RequirePkce = false,
+                RedirectUris = { config["ClientApp"] + "/api/auth/callback/id-server" },
+                AllowOfflineAccess = true,
+                AllowedScopes = { "openid", "profile", "auctionApp" },
+                AccessTokenLifetime = 3600 * 24 * 30,
+                AlwaysIncludeUserClaimsInIdToken = true
+            }
+        ];
+    }
 }

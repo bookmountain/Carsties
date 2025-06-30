@@ -34,10 +34,6 @@ const BidList: React.FC<IBidListProps> = ({ user, auction }) => {
     useEffect(() => {
         getBidsForAuction(auction.id)
             .then((res) => {
-                if ("error" in res) {
-                    throw new Error(res.error.message);
-                }
-
                 setBids(res);
             })
             .catch((err) => {

@@ -14,46 +14,39 @@ import AuctionFinishedToast from "../components/AuctionFinishedToast";
 interface ISignalRProviderProps {
     children: ReactNode;
     user: User | null;
+    notifyUrl: string;
 }
 
-const SignalRProvider: React.FC<ISignalRProviderProps> = ({ children, user }) => {
+const SignalRProvider: React.FC<ISignalRProviderProps> = ({ children, user, notifyUrl }) => {
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const setCurrentPrice = useAuctionStore(state => state.setCurrentPrice);
     const addBid = useBidStore(state => state.addBid);
-    const apiUrl = process.env.NODE_ENV === "production"
-        ? "https://api.carsties.store/notifications"
-        // : process.env.NEXT_PUBLIC_NOTIFY_URL;
-        : "http://localhost:6001/notifications";
 
     useEffect(() => {
         const newConnection = new HubConnectionBuilder()
-            .withUrl(apiUrl!)
+            .withUrl(notifyUrl)
             .withAutomaticReconnect()
             .build();
 
         setConnection(newConnection);
-    }, [apiUrl]);
- 
+    }, [notifyUrl]);
+
     useEffect(() => {
         if (connection) {
             connection.start()
                 .then(() => {
-                    console.log("Connected to notification hub");
-
                     connection.on("BidPlaced", (bid: Bid) => {
                         if (bid.bidStatus.includes("Accepted")) {
                             setCurrentPrice(bid.auctionId, bid.amount);
                         }
                         addBid(bid);
                     });
-
                     connection.on("AuctionCreated", (auction: Auction) => {
                         if (user?.username !== auction.seller) {
                             return toast(<AuctionCreatedToast auction={auction} />,
                                 { duration: 10000 });
                         }
                     });
-
                     connection.on("AuctionFinished", (finishedAuction: AuctionFinished) => {
                         const auction = getDetailedViewData(finishedAuction.auctionId);
                         return toast.promise(auction, {
@@ -66,8 +59,6 @@ const SignalRProvider: React.FC<ISignalRProviderProps> = ({ children, user }) =>
                             error: (err) => "Auction finished!"
                         }, { success: { duration: 10000, icon: null } });
                     });
-
-
                 }).catch(error => console.log(error));
         }
 
