@@ -1,8 +1,8 @@
 "use client";
 
+import React from "react";
 import { Auction } from "@/types";
 import { Table } from "flowbite-react";
-import React from "react";
 
 interface IDetailedSpecs {
     auction: Auction;

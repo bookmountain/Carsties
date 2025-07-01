@@ -1,4 +1,4 @@
-import { getTokenWorkaround } from "@/app/actions/authActions";
+import { auth } from "@/auth";
 
 const baseUrl = process.env.API_URL;
 
@@ -52,10 +52,12 @@ async function del<T>(url: string): Promise<T> {
 }
 
 async function getHeaders() {
-    const token = await getTokenWorkaround();
-    const headers = { "Content-type": "application/json" } as Record<string, string>;
-    if (token) {
-        headers.Authorization = "Bearer " + token.access_token;
+    const session = await auth();
+    const headers = {
+        "Content-type": "application/json"
+    } as any;
+    if (session?.accessToken) {
+        headers.Authorization = "Bearer " + session.accessToken;
     }
     return headers;
 }
