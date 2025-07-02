@@ -1,38 +1,42 @@
+version: "3.8"
+
 services:
   postgres:
     image: postgres
     environment:
-      - POSTGRES_PASSWORD=postgrespw
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - 5432:5432
     volumes:
       - /var/lib/postgresql/data
+
   mongodb:
     image: mongo
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=mongopw
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - 27017:27017
     volumes:
       - /data/db
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+
   auction-svc:
-    image: booksam/auction-svc:latest
     build:
       context: .
       dockerfile: src/AuctionService/Dockerfile
+    image: booksam/auction-svc:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ASPNETCORE_URLS=http://+:7777
       - RabbitMq__Host=rabbitmq
-      - ConnectionStrings__DefaultConnection=Server=postgres;User Id=postgres;Password=postgrespw;Database=auctions
+      - ConnectionStrings__DefaultConnection=Server=postgres;User Id=${PG_USER};Password=${PG_PASS};Database=auctions
       - IdentityServiceUrl=http://identity-svc
       - Kestrel__Endpoints__Grpc__Protocols=Http2
       - Kestrel__Endpoints__Grpc__Url=http://+:7777
@@ -44,56 +48,60 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+
   search-svc:
-    image: booksam/search-svc:latest
     build:
       context: .
       dockerfile: src/SearchService/Dockerfile
+    image: booksam/search-svc:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - RabbitMq__Host=rabbitmq
-      - ConnectionStrings__MongoDbConnection=mongodb://root:mongopw@mongodb
+      - ConnectionStrings__MongoDbConnection=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb
       - AuctionServiceUrl=http://auction-svc
     ports:
       - 7002:80
     depends_on:
       - mongodb
       - rabbitmq
+
   identity-svc:
-    image: booksam/identity-svc:latest
     build:
       context: .
       dockerfile: src/IdentityService/Dockerfile
+    image: booksam/identity-svc:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
-      - IssuerUri=https://id.carsties.local
-      - ClientApp=https://app.carsties.local
-      - ConnectionStrings__DefaultConnection=Server=postgres; User Id=postgres; Password=postgrespw; Database=identity
+      - IssuerUri=${ISSUER_URI}
+      - ClientApp=${CLIENT_APP}
+      - ConnectionStrings__DefaultConnection=Server=postgres;User Id=${PG_USER};Password=${PG_PASS};Database=identity
       - VIRTUAL_HOST=id.carsties.local
     depends_on:
       - postgres
+
   gateway-svc:
-    image: booksam/gateway-svc:latest
     build:
       context: .
       dockerfile: src/GatewayService/Dockerfile
+    image: booksam/gateway-svc:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
-      - ClientApp=https://app.carsties.local
+      - ClientApp=${CLIENT_APP}
       - VIRTUAL_HOST=api.carsties.local
+
   bid-svc:
-    image: booksam/bid-svc:latest
     build:
       context: .
       dockerfile: src/BiddingService/Dockerfile
+    image: booksam/bid-svc:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - RabbitMq__Host=rabbitmq
-      - ConnectionStrings__BidDbConnection=mongodb://root:mongopw@mongodb
+      - ConnectionStrings__BidDbConnection=mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb
       - IdentityServiceUrl=http://identity-svc
       - GrpcAuction=http://auction-svc:7777
     ports:
@@ -101,11 +109,12 @@ services:
     depends_on:
       - mongodb
       - rabbitmq
+
   notify-svc:
-    image: booksam/notify-svc:latest
     build:
       context: .
       dockerfile: src/NotificationService/Dockerfile
+    image: booksam/notify-svc:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
@@ -114,23 +123,25 @@ services:
       - 7004:80
     depends_on:
       - rabbitmq
+
   web-app:
-    image: booksam/web-app
     build:
       context: .
       dockerfile: frontend/web-app/Dockerfile
+    image: booksam/web-app
     volumes:
       - /var/lib/web/data
     environment:
-      - AUTH_SECRET="7vgUxWjehgeKTOFH2dZu0zSeKP61o9gl0b1vuHCqeMo="
-      - AUTH_URL=https://app.carsties.local
-      - AUTH_URL_INTERNAL=http://web-app:3000
-      - API_URL=http://gateway-svc/
-      - ID_URL=https://id.carsties.local
-      - ID_URL_INTERNAL=http://identity-svc
-      - NOTIFY_URL=https://api.carsties.local/notifications
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_URL=${AUTH_URL}
+      - AUTH_URL_INTERNAL=${AUTH_URL_INTERNAL}
+      - API_URL=${API_URL}
+      - ID_URL=${ID_URL}
+      - ID_URL_INTERNAL=${ID_URL_INTERNAL}
+      - NOTIFY_URL=${NOTIFY_URL}
       - VIRTUAL_HOST=app.carsties.local
       - VIRTUAL_PORT=3000
+
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
